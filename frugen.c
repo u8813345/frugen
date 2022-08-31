@@ -587,6 +587,16 @@ int main(int argc, char *argv[])
 								debug(2, "Chassis type 0x%02X loaded from JSON", chassis.type);
 								has_chassis = true;
 							}
+							json_object_object_get_ex(jso, "soffset", &jsfield);
+							if (jsfield) {
+								chassis.soffset = json_object_get_int(jsfield);
+								debug(2, "Chassis start offset 0x%02X loaded from JSON", chassis.soffset);
+							}
+							json_object_object_get_ex(jso, "alength", &jsfield);
+							if (jsfield) {
+								chassis.alength = json_object_get_int(jsfield);
+								debug(2, "Chassis area length 0x%02X loaded from JSON", chassis.alength);
+							}
 							/* Now get values for the string fields */
 							has_chassis |= json_fill_fru_area_fields(jso, ARRAY_SZ(field), fieldname, field);
 							has_chassis |= json_fill_fru_area_custom(jso, &chassis.cust);
@@ -611,6 +621,16 @@ int main(int argc, char *argv[])
 								has_board = true;
 								has_bdate = true;
 							}
+							json_object_object_get_ex(jso, "soffset", &jsfield);
+							if (jsfield) {
+								board.soffset = json_object_get_int(jsfield);
+								debug(2, "Board start offset 0x%02X loaded from JSON", board.soffset);
+							}
+							json_object_object_get_ex(jso, "alength", &jsfield);
+							if (jsfield) {
+								board.alength = json_object_get_int(jsfield);
+								debug(2, "Board area length 0x%02X loaded from JSON", board.alength);
+							}
 							/* Now get values for the string fields */
 							has_board |= json_fill_fru_area_fields(jso, ARRAY_SZ(field), fieldname, field);
 							has_board |= json_fill_fru_area_custom(jso, &board.cust);
@@ -627,6 +647,16 @@ int main(int argc, char *argv[])
 								has_product = true;
 							}
 #endif
+							json_object_object_get_ex(jso, "soffset", &jsfield);
+							if (jsfield) {
+								product.soffset = json_object_get_int(jsfield);
+								debug(2, "Product start offset 0x%02X loaded from JSON", product.soffset);
+							}
+							json_object_object_get_ex(jso, "alength", &jsfield);
+							if (jsfield) {
+								product.alength = json_object_get_int(jsfield);
+								debug(2, "Product area length 0x%02X loaded from JSON", product.alength);
+							}
 							/* Now get values for the string fields */
 							has_product |= json_fill_fru_area_fields(jso, ARRAY_SZ(field), fieldname, field);
 							has_product |= json_fill_fru_area_custom(jso, &product.cust);
@@ -805,8 +835,10 @@ int main(int argc, char *argv[])
 		e = errno;
 		free_reclist(chassis.cust);
 
-		if (ci)
+		if (ci) {
 			areas[FRU_CHASSIS_INFO].data = ci;
+			areas[FRU_CHASSIS_INFO].soffset = chassis.soffset;
+		}
 		else {
 			errno = e;
 			fatal("Error allocating a chassis info area: %m");
@@ -829,8 +861,10 @@ int main(int argc, char *argv[])
 		e = errno;
 		free_reclist(board.cust);
 
-		if (bi)
+		if (bi) {
 			areas[FRU_BOARD_INFO].data = bi;
+			areas[FRU_BOARD_INFO].soffset = board.soffset;
+		}
 		else {
 			errno = e;
 			fatal("Error allocating a board info area: %m");
@@ -847,8 +881,10 @@ int main(int argc, char *argv[])
 		e = errno;
 		free_reclist(product.cust);
 
-		if (pi)
+		if (pi) {
 			areas[FRU_PRODUCT_INFO].data = pi;
+			areas[FRU_PRODUCT_INFO].soffset = product.soffset;
+		}
 		else {
 			errno = e;
 			fatal("Error allocating a product info area: %m");

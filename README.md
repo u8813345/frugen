@@ -185,7 +185,7 @@ __Dependency:__ json-c library (https://github.com/json-c/json-c)
 The frugen tool supports JSON files. You may specify all the FRU info fields (mind the
 general tool limitations) in a file and use it as an input for the tool:
 
-    frugen --json --from=example.json fru.bin
+    frugen -I --json --from=example.json fru.bin
 
 An example file 'example.json' is provided for your reference.
 

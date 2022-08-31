@@ -107,6 +107,7 @@ typedef enum {
  */
 typedef struct fru_area_s {
 	fru_area_type_t atype; /**< FRU area type */
+	uint8_t soffset;
 	uint8_t blocks; /**< Size of the data field in 8-byte blocks */
 	void * data; /**< Pointer to the actual FRU area data */
 } fru_area_t;
@@ -271,6 +272,8 @@ typedef fru_mr_rec_t fru_mr_area_t; /// Intended for use as a pointer only
 #define FRU_BLOCKS(bytes)  (((bytes) + FRU_BLOCK_SZ - 1) / FRU_BLOCK_SZ)
 
 typedef struct {
+	uint8_t soffset;
+	uint8_t alength;
 	uint8_t type;
 	unsigned char pn[FRU_FIELDMAXARRAY];
 	unsigned char serial[FRU_FIELDMAXARRAY];
@@ -278,6 +281,8 @@ typedef struct {
 } fru_exploded_chassis_t;
 
 typedef struct {
+	uint8_t soffset;
+	uint8_t alength;
 	uint8_t lang;
 	struct timeval tv;
 	unsigned char mfg[FRU_FIELDMAXARRAY];
@@ -289,6 +294,8 @@ typedef struct {
 } fru_exploded_board_t;
 
 typedef struct {
+	uint8_t soffset;
+	uint8_t alength;
 	uint8_t lang;
 	unsigned char mfg[FRU_FIELDMAXARRAY];
 	unsigned char pname[FRU_FIELDMAXARRAY];

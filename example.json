@@ -3,6 +3,8 @@
 	   the length is calculated automatically */
 	"internal" : "010203040A0B0C0D",
 	"chassis" : {
+		"soffset" : 12,
+		"alength" : 12,
 		"type": 10,
 		"pn" : "CHAS-C00L-12",
 		"serial": "45678",
@@ -12,6 +14,8 @@
 		]
 	},
 	"board" : {
+		"soffset" : 24,
+		"alength" : 18,
 		/* The date, if not specified, will be taken automatically from
 		 * the current system time. You may specify the `-u` option to
 		 * `frugen` in order to leave the date 'Unspecified' */
@@ -28,6 +32,8 @@
 		]
 	},
 	"product" : {
+		"soffset" : 42,
+		"alength" : 26,
 		"lang": 1,
 		"mfg" : "Super OEM Company",
 		"pn" : "PRD-PN-1234",

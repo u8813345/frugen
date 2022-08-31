@@ -428,6 +428,7 @@ uint8_t fru_area_checksum(fru_info_area_t *area)
  */
 static
 fru_info_area_t *fru_create_info_area(fru_area_type_t atype,    ///< [in] Area type (FRU_[CHASSIS|BOARD|PRODUCT]_INFO)
+                                      uint8_t alength,
                                       uint8_t langtype,         ///< [in] Language code for areas that use it (board, product) or Chassis Type for chassis info area
                                       const struct timeval *tv, ///< [in] Manufacturing time since the Epoch (1970/01/01 00:00:00 +0000 UTC) for areas that use it (board)
                                       fru_reclist_t *fields,   ///< [in] Single-linked list of data fields
@@ -507,6 +508,9 @@ fru_info_area_t *fru_create_info_area(fru_area_type_t atype,    ///< [in] Area t
 	}
 
 	header.blocks = FRU_BLOCKS(totalsize); // Round up to multiple of 8 bytes
+	if(alength > FRU_BLOCKS(totalsize)) {
+		header.blocks = alength; // Round up to multiple of 8 bytes
+	}
 	padding_size = header.blocks * FRU_BLOCK_SZ - totalsize;
 
 	out = calloc(1, FRU_BYTES(header.blocks)); // This will be returned and freed by the caller
@@ -586,6 +590,7 @@ fru_chassis_area_t * fru_chassis_info(const fru_exploded_chassis_t *chassis) ///
 	}
 
 	out = fru_create_info_area(FRU_CHASSIS_INFO,
+	                           chassis->alength,
 	                           chassis->type, NULL, fields,
 	                           ARRAY_SZ(strings), strings);
 
@@ -631,6 +636,7 @@ fru_board_area_t * fru_board_info(const fru_exploded_board_t *board) ///< [in] E
 	fru_board_area_t *out = NULL;
 
 	out = (fru_board_area_t *)fru_create_info_area(FRU_BOARD_INFO,
+	                                               board->alength,
 	                                               board->lang, &board->tv, fields,
 	                                               ARRAY_SZ(strings), strings);
 
@@ -681,6 +687,7 @@ fru_product_area_t * fru_product_info(const fru_exploded_product_t *product) ///
 	fru_product_area_t *out = NULL;
 
 	out = fru_create_info_area(FRU_PRODUCT_INFO,
+	                           product->alength,
 	                           product->lang, NULL, fields,
 	                           ARRAY_SZ(strings), strings);
 
@@ -893,6 +900,7 @@ fru_t * fru_create(fru_area_t area[FRU_MAX_AREAS], size_t *size)
 	// First calculate the total size of the FRU information storage file to be allocated.
 	for(i = 0; i < FRU_MAX_AREAS; i++) {
 		uint8_t atype = area[i].atype;
+		uint8_t soffset = area[i].soffset;
 		uint8_t blocks = area[i].blocks;
 		fru_info_area_t *data = area[i].data;
 
@@ -918,9 +926,17 @@ fru_t * fru_create(fru_area_t area[FRU_MAX_AREAS], size_t *size)
 			blocks = data->blocks;
 			area[i].blocks = blocks;
 		}
+	
+		DEBUG("totalblocks is 0x%02x  soffset is 0x%02x blocks is 0x%02x\n", totalblocks,soffset,blocks);
 
-		*offset = totalblocks;
-		totalblocks += blocks;
+		*offset = (soffset != 0) ? soffset : totalblocks;
+		//totalblocks += blocks;
+		if (totalblocks >= *offset) {
+			totalblocks += blocks;
+		}
+		else {
+			totalblocks = *offset + blocks;
+		}
 	}
 
 	// Calcute header checksum
